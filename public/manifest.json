@@ -1,0 +1,22 @@
+{
+    "name": "EBD ADMDF",
+    "short_name": "EBD ADMDF",
+    "description": "App de gestão de alunos e frequência da EBD",
+    "start_url": "/",
+    "display": "standalone",
+    "background_color": "#ffffff",
+    "theme_color": "#1D4ED8",
+    "icons": [
+      {
+        "src": "/icon-192.png",
+        "sizes": "192x192",
+        "type": "image/png"
+      },
+      {
+        "src": "/icon-512.png",
+        "sizes": "512x512",
+        "type": "image/png"
+      }
+    ]
+  }
+  

@@ -1,0 +1,16 @@
+# Ignorar node_modules e pastas de build
+node_modules
+.next
+out
+
+# Logs e outros arquivos temporários
+*.log
+.DS_Store
+
+# Arquivos do sistema Windows
+Thumbs.db
+ehthumbs.db
+
+# Arquivos temporários do VS Code e editores
+*.swp
+.vscode
