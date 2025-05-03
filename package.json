@@ -8,6 +8,7 @@
         "start": "next start"
     },
     "dependencies": {
+        "@radix-ui/react-dialog": "^1.1.11",
         "autoprefixer": "^10.4.12",
         "firebase": "^11.6.1",
         "jspdf": "^3.0.1",
