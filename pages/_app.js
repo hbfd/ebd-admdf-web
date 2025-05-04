@@ -8,7 +8,6 @@ import { Menu } from 'lucide-react';
 import { Sheet, SheetTrigger, SheetContent } from '../components/ui/sheet';
 import { Button } from '../components/ui/button';
 
-
 function Layout({ children }) {
   const router = useRouter();
   const [tema, setTema] = useState('claro');
@@ -64,7 +63,7 @@ function Layout({ children }) {
               <Menu className="w-6 h-6" />
             </Button>
           </SheetTrigger>
-          <SheetContent side="left" className="w-64 p-4 bg-blue-700 text-white">
+          <SheetContent side="left" className="w-64 p-4 bg-blue-700 text-gray-900 dark:text-white">
             <h2 className="text-xl font-bold mb-4">EBD ADMDF</h2>
             <nav className="flex flex-col space-y-2">{menuLinks}</nav>
           </SheetContent>
