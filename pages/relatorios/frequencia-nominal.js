@@ -22,7 +22,7 @@ export default function FrequenciaNominal() {
   const chamadasFiltradas = frequencias
     .filter(f => turma ? f.turma === turma : true)
     .filter(f => {
-      const data = new Date(f.data);
+      const data = new Date(f.data + 'T00:00:00');
       if (dataInicio && data < new Date(dataInicio)) return false;
       if (dataFim && data > new Date(dataFim)) return false;
       return true;
@@ -70,7 +70,7 @@ export default function FrequenciaNominal() {
   });
 
   const formatarData = (iso) => {
-    const d = new Date(iso);
+    const d = new Date(iso + 'T00:00:00');
     if (isNaN(d)) return '';
     const dia = String(d.getDate()).padStart(2, '0');
     const mes = String(d.getMonth() + 1).padStart(2, '0');
