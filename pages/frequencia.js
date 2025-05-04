@@ -10,6 +10,11 @@ export default function Frequencia() {
   const [data, setData] = useState('');
   const [licao, setLicao] = useState('');
 
+  const [biblias, setBiblias] = useState('');
+  const [revistas, setRevistas] = useState('');
+  const [visitantes, setVisitantes] = useState('');
+  const [ofertas, setOfertas] = useState('');
+
   useEffect(() => {
     const turmasSalvas = JSON.parse(localStorage.getItem('turmas') || '[]');
     const pessoasSalvas = JSON.parse(localStorage.getItem('pessoas') || '[]');
@@ -26,7 +31,7 @@ export default function Frequencia() {
 
   const salvarChamada = () => {
     if (!data || !licao || !turmaSelecionada || !professorSelecionado) {
-      Swal.fire('Erro', 'Preencha todos os campos.', 'error');
+      Swal.fire('Erro', 'Preencha todos os campos obrigatórios.', 'error');
       return;
     }
 
@@ -35,6 +40,10 @@ export default function Frequencia() {
       licao,
       turma: turmaSelecionada,
       professor: professorSelecionado,
+      biblias,
+      revistas,
+      visitantes,
+      ofertas,
       alunos: alunosDaTurma.map(a => ({
         nome: a.nome,
         presente: presencas[a.nome] || false
@@ -52,6 +61,10 @@ export default function Frequencia() {
     setProfessorSelecionado('');
     setData('');
     setLicao('');
+    setBiblias('');
+    setRevistas('');
+    setVisitantes('');
+    setOfertas('');
   };
 
   return (
@@ -63,56 +76,54 @@ export default function Frequencia() {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           <div>
             <label className="font-semibold block mb-1 text-gray-700 dark:text-gray-200">Data</label>
-            <input
-              type="date"
-              value={data}
-              onChange={(e) => setData(e.target.value)}
-              className="w-full border rounded p-2 dark:bg-gray-700 dark:text-white"
-            />
+            <input type="date" value={data} onChange={(e) => setData(e.target.value)} className="w-full border rounded p-2 dark:bg-gray-700 dark:text-white" />
           </div>
 
           <div>
             <label className="font-semibold block mb-1 text-gray-700 dark:text-gray-200">Lição</label>
-            <input
-              type="number"
-              min="1"
-              value={licao}
-              onChange={(e) => setLicao(e.target.value)}
-              className="w-full border rounded p-2 dark:bg-gray-700 dark:text-white"
-              placeholder="Nº da Lição"
-            />
+            <input type="number" min="1" value={licao} onChange={(e) => setLicao(e.target.value)} className="w-full border rounded p-2 dark:bg-gray-700 dark:text-white" placeholder="Nº da Lição" />
           </div>
 
           <div>
             <label className="font-semibold block mb-1 text-gray-700 dark:text-gray-200">Turma</label>
-            <select
-              value={turmaSelecionada}
-              onChange={(e) => {
-                setTurmaSelecionada(e.target.value);
-                setProfessorSelecionado('');
-                setPresencas({});
-              }}
-              className="w-full border rounded p-2 dark:bg-gray-700 dark:text-white"
-            >
+            <select value={turmaSelecionada} onChange={(e) => {
+              setTurmaSelecionada(e.target.value);
+              setProfessorSelecionado('');
+              setPresencas({});
+            }} className="w-full border rounded p-2 dark:bg-gray-700 dark:text-white">
               <option value="">Selecione a Turma</option>
-              {turmas.map((t, i) => (
-                <option key={i} value={t}>{t}</option>
-              ))}
+              {turmas.map((t, i) => <option key={i} value={t}>{t}</option>)}
             </select>
           </div>
 
           <div>
             <label className="font-semibold block mb-1 text-gray-700 dark:text-gray-200">Professor do Dia</label>
-            <select
-              value={professorSelecionado}
-              onChange={(e) => setProfessorSelecionado(e.target.value)}
-              className="w-full border rounded p-2 dark:bg-gray-700 dark:text-white"
-            >
+            <select value={professorSelecionado} onChange={(e) => setProfessorSelecionado(e.target.value)} className="w-full border rounded p-2 dark:bg-gray-700 dark:text-white">
               <option value="">Selecione o Professor</option>
-              {professoresDaTurma.map((p, i) => (
-                <option key={i} value={p.nome}>{p.nome}</option>
-              ))}
+              {professoresDaTurma.map((p, i) => <option key={i} value={p.nome}>{p.nome}</option>)}
             </select>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <div>
+            <label className="font-semibold block mb-1 text-gray-700 dark:text-gray-200">Bíblias</label>
+            <input type="number" min="0" value={biblias} onChange={(e) => setBiblias(e.target.value)} className="w-full border rounded p-2 dark:bg-gray-700 dark:text-white" />
+          </div>
+
+          <div>
+            <label className="font-semibold block mb-1 text-gray-700 dark:text-gray-200">Revistas</label>
+            <input type="number" min="0" value={revistas} onChange={(e) => setRevistas(e.target.value)} className="w-full border rounded p-2 dark:bg-gray-700 dark:text-white" />
+          </div>
+
+          <div>
+            <label className="font-semibold block mb-1 text-gray-700 dark:text-gray-200">Visitantes</label>
+            <input type="number" min="0" value={visitantes} onChange={(e) => setVisitantes(e.target.value)} className="w-full border rounded p-2 dark:bg-gray-700 dark:text-white" />
+          </div>
+
+          <div>
+            <label className="font-semibold block mb-1 text-gray-700 dark:text-gray-200">Ofertas (R$)</label>
+            <input type="number" step="0.01" min="0" value={ofertas} onChange={(e) => setOfertas(e.target.value)} className="w-full border rounded p-2 dark:bg-gray-700 dark:text-white" />
           </div>
         </div>
 
@@ -122,11 +133,7 @@ export default function Frequencia() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
               {alunosDaTurma.map((a, i) => (
                 <label key={i} className="flex items-center gap-2 bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white p-2 rounded">
-                  <input
-                    type="checkbox"
-                    checked={presencas[a.nome] || false}
-                    onChange={() => marcarPresenca(a.nome)}
-                  />
+                  <input type="checkbox" checked={presencas[a.nome] || false} onChange={() => marcarPresenca(a.nome)} />
                   {a.nome}
                 </label>
               ))}
@@ -135,10 +142,7 @@ export default function Frequencia() {
         )}
 
         <div className="text-center">
-          <button
-            onClick={salvarChamada}
-            className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-6 rounded shadow-md"
-          >
+          <button onClick={salvarChamada} className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-6 rounded shadow-md">
             Salvar Frequência
           </button>
         </div>

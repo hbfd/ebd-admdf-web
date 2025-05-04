@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import Swal from 'sweetalert2';
 
@@ -24,7 +24,14 @@ export default function EditarFrequencia() {
     }
 
     setIndex(idx);
-    setFrequencia(selecionada);
+    setFrequencia({
+      ...selecionada,
+      biblias: selecionada.biblias || '',
+      revistas: selecionada.revistas || '',
+      visitantes: selecionada.visitantes || '',
+      ofertas: selecionada.ofertas || '',
+    });
+
     const marcadas = {};
     selecionada.alunos.forEach(a => {
       marcadas[a.nome] = a.presente;
@@ -129,6 +136,50 @@ export default function EditarFrequencia() {
                 <option key={i} value={p.nome}>{p.nome}</option>
               ))}
             </select>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div>
+            <label className="font-semibold block mb-1">Bíblias</label>
+            <input
+              type="number"
+              value={frequencia.biblias}
+              onChange={(e) => setFrequencia({ ...frequencia, biblias: e.target.value })}
+              className="w-full border rounded p-2 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+              placeholder="Qtd. Bíblias"
+            />
+          </div>
+          <div>
+            <label className="font-semibold block mb-1">Revistas</label>
+            <input
+              type="number"
+              value={frequencia.revistas}
+              onChange={(e) => setFrequencia({ ...frequencia, revistas: e.target.value })}
+              className="w-full border rounded p-2 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+              placeholder="Qtd. Revistas"
+            />
+          </div>
+          <div>
+            <label className="font-semibold block mb-1">Visitantes</label>
+            <input
+              type="number"
+              value={frequencia.visitantes}
+              onChange={(e) => setFrequencia({ ...frequencia, visitantes: e.target.value })}
+              className="w-full border rounded p-2 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+              placeholder="Qtd. Visitantes"
+            />
+          </div>
+          <div>
+            <label className="font-semibold block mb-1">Ofertas (R$)</label>
+            <input
+              type="number"
+              step="0.01"
+              value={frequencia.ofertas}
+              onChange={(e) => setFrequencia({ ...frequencia, ofertas: e.target.value })}
+              className="w-full border rounded p-2 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+              placeholder="Valor das Ofertas"
+            />
           </div>
         </div>
 

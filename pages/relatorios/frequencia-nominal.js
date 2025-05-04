@@ -43,6 +43,10 @@ export default function FrequenciaNominal() {
         aluno: a.nome,
         presente: a.presente,
         professor: f.professor,
+        biblias: f.biblias,
+        revistas: f.revistas,
+        visitantes: f.visitantes,
+        ofertas: f.ofertas,
       });
     });
   });
@@ -52,12 +56,22 @@ export default function FrequenciaNominal() {
   const agrupados = {};
   registros.forEach(r => {
     const chave = `Lição ${r.licao} – Professor: ${r.professor || 'Desconhecido'}`;
-    if (!agrupados[chave]) agrupados[chave] = [];
-    agrupados[chave].push(r);
+    if (!agrupados[chave]) {
+      agrupados[chave] = {
+        alunos: [],
+        data: r.data,
+        biblias: r.biblias || 0,
+        revistas: r.revistas || 0,
+        visitantes: r.visitantes || 0,
+        ofertas: r.ofertas || 0,
+      };
+    }
+    agrupados[chave].alunos.push(r);
   });
 
   const formatarData = (iso) => {
     const d = new Date(iso);
+    if (isNaN(d)) return '';
     const dia = String(d.getDate()).padStart(2, '0');
     const mes = String(d.getMonth() + 1).padStart(2, '0');
     const ano = d.getFullYear();
@@ -85,12 +99,12 @@ export default function FrequenciaNominal() {
 
     doc.addImage(logo, 'JPEG', 10, 10, 25, 25);
     doc.setFontSize(16);
-    doc.text(`Relatório de Frequência Nominal`, 150, 20, { align: 'center' });
+    doc.text(`Relatório de Frequência`, 150, 20, { align: 'center' });
     doc.setFontSize(10);
     doc.text(`Turma: ${turma || 'Todas'} | ${dataInicio || 'início'} até ${dataFim || 'hoje'}${licaoFiltro ? ` | Lição ${licaoFiltro}` : ''}`, 150, 28, { align: 'center' });
 
     let y = 40;
-    Object.entries(agrupados).forEach(([titulo, lista]) => {
+    Object.entries(agrupados).forEach(([titulo, grupo]) => {
       autoTable(doc, {
         startY: y,
         head: [[titulo]],
@@ -98,36 +112,41 @@ export default function FrequenciaNominal() {
         styles: { fontStyle: 'bold', halign: 'left' },
         margin: { left: 14 },
       });
+
+      doc.setFontSize(10);
+      doc.text(`Bíblias: ${grupo.biblias || 0} | Revistas: ${grupo.revistas || 0} | Visitantes: ${grupo.visitantes || 0} | Ofertas: R$ ${Number(grupo.ofertas || 0).toFixed(2)}`, 14, doc.lastAutoTable.finalY + 5);
+
       autoTable(doc, {
         head: [['Data', 'Aluno', 'Status']],
-        body: lista.map(r => [
+        body: (grupo.alunos || []).map(r => [
           formatarData(r.data),
           r.aluno,
           r.presente ? 'Presente' : 'Ausente',
         ]),
         styles: { fontSize: 10 },
-        startY: doc.lastAutoTable.finalY + 2,
+        startY: doc.lastAutoTable.finalY + 10,
         headStyles: {
           fillColor: [33, 150, 243],
           textColor: 255,
           fontStyle: 'bold',
         },
       });
+
       y = doc.lastAutoTable.finalY + 10;
     });
 
-    doc.save(`frequencia_nominal_${turma}.pdf`);
+    doc.save(`frequencia_${turma || 'geral'}.pdf`);
   };
 
   return (
     <div className="min-h-screen p-6 bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-white">
-      <h1 className="text-2xl font-bold mb-4 text-center">Relatório de Frequência Nominal</h1>
+      <h1 className="text-2xl font-bold mb-4 text-center">Relatório de Frequência</h1>
 
       <div className="bg-white dark:bg-gray-800 p-4 rounded shadow max-w-5xl mx-auto space-y-4">
         <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
           <select className="border p-2 rounded dark:bg-gray-700 dark:border-gray-600 dark:text-white" value={turma} onChange={e => setTurma(e.target.value)}>
             <option value="">Turma</option>
-            {turmas.map((t, i) => <option key={i}>{t}</option>)}
+            {turmas.map((t, i) => <option key={i} value={t}>{t}</option>)}
           </select>
 
           <input className="border p-2 rounded dark:bg-gray-700 dark:border-gray-600 dark:text-white" type="date" value={dataInicio} onChange={e => setDataInicio(e.target.value)} />
@@ -145,9 +164,10 @@ export default function FrequenciaNominal() {
         {Object.keys(agrupados).length === 0 ? (
           <p className="text-center text-gray-500 dark:text-gray-300 mt-6">Nenhum registro encontrado com os filtros aplicados.</p>
         ) : (
-          Object.entries(agrupados).map(([chave, lista], idx) => (
+          Object.entries(agrupados).map(([chave, grupo], idx) => (
             <div key={idx}>
               <h3 className="text-lg font-bold mt-6">{chave}</h3>
+              <p className="text-sm mb-2">Bíblias: {grupo.biblias || 0} | Revistas: {grupo.revistas || 0} | Visitantes: {grupo.visitantes || 0} | Ofertas: R$ {Number(grupo.ofertas || 0).toFixed(2)}</p>
               <table className="w-full border mt-2 text-sm dark:border-gray-700">
                 <thead>
                   <tr className="bg-blue-100 dark:bg-blue-900 dark:text-white">
@@ -157,7 +177,7 @@ export default function FrequenciaNominal() {
                   </tr>
                 </thead>
                 <tbody>
-                  {lista.map((r, i) => (
+                  {(grupo.alunos || []).map((r, i) => (
                     <tr key={i} className="text-center">
                       <td className="p-1 border dark:border-gray-700">{formatarData(r.data)}</td>
                       <td className="p-1 border dark:border-gray-700">{r.aluno}</td>

@@ -8,7 +8,7 @@ export default function RelatoriosIndex() {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto">
         <Link href="/relatorios/frequencia-nominal">
           <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow hover:shadow-lg transition">
-            <h2 className="text-2xl font-semibold mb-2">Frequência Nominal</h2>
+            <h2 className="text-2xl font-semibold mb-2">Frequência</h2>
             <p>Veja a lista de presença de cada chamada.</p>
           </div>
         </Link>

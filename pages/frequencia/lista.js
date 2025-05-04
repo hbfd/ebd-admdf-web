@@ -56,6 +56,10 @@ export default function ListaFrequencias() {
                   <p><strong>Turma:</strong> {f.turma}</p>
                   <p><strong>Professor:</strong> {f.professor}</p>
                   <p><strong>Presentes:</strong> {totalPresentes}/{f.alunos.length}</p>
+                  <p><strong>Bíblias:</strong> {f.biblias || 0}</p>
+                  <p><strong>Revistas:</strong> {f.revistas || 0}</p>
+                  <p><strong>Visitantes:</strong> {f.visitantes || 0}</p>
+                  <p><strong>Ofertas (R$):</strong> {f.ofertas?.toFixed?.(2) ?? '0.00'}</p>
                 </div>
                 <div className="flex gap-2">
                   <button
