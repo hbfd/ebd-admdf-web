@@ -40,6 +40,13 @@ export default function RelatoriosIndex() {
             <p>Total de presenças por aluno em um mês específico.</p>
           </div>
         </Link>
+
+        <Link href="/relatorios/trimestral">
+          <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow hover:shadow-lg transition">
+            <h2 className="text-2xl font-semibold mb-2">Presença por Trimestre</h2>
+            <p>Total de presenças por aluno em um trimestre do ano.</p>
+          </div>
+        </Link>
       </div>
     </div>
   );
