@@ -135,7 +135,17 @@ export default function FrequenciaNominal() {
       y = doc.lastAutoTable.finalY + 10;
     });
 
-    doc.save(`frequencia_${turma || 'geral'}.pdf`);
+    // Formata a data atual
+  const hoje = new Date();
+  const dia = String(hoje.getDate()).padStart(2, '0');
+  const mes = String(hoje.getMonth() + 1).padStart(2, '0');
+  const ano = hoje.getFullYear();
+  const dataFormatada = `${dia}-${mes}-${ano}`;
+
+  // Define o nome do arquivo com o novo padrão
+  const nomeArquivo = `frequencia_${turma || 'geral'}_${dataFormatada}.pdf`;
+
+  doc.save(nomeArquivo);
   };
 
   return (
