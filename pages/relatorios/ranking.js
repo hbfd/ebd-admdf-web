@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
 import Swal from 'sweetalert2';
 import {
   BarChart,
@@ -51,7 +52,22 @@ export default function Ranking() {
     setRanking(arr);
   }, [frequencias, filtrarTurma, filtrarProfessor]);
 
-  const exportarPDF = () => {
+  const carregarLogo = () => {
+    return new Promise((resolve) => {
+      const img = new Image();
+      img.crossOrigin = 'Anonymous';
+      img.src = '/admdf.jpg';
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        canvas.width = img.width;
+        canvas.height = img.height;
+        canvas.getContext('2d').drawImage(img, 0, 0);
+        resolve(canvas.toDataURL('image/jpeg'));
+      };
+    });
+  };
+
+  const exportarPDF = async () => {
     if (ranking.length === 0) {
       Swal.fire({
         icon: 'info',
@@ -62,20 +78,38 @@ export default function Ranking() {
     }
 
     const doc = new jsPDF();
+    const logo = await carregarLogo();
+
+    doc.addImage(logo, 'JPEG', 10, 10, 25, 25);
     doc.setFontSize(16);
-    doc.text('Ranking de Presença', 20, 20);
+    doc.text('Ranking de Presença', 105, 20, { align: 'center' });
+    doc.setFontSize(10);
+    doc.text(
+      `Turma: ${filtrarTurma || 'Todas'}${filtrarProfessor ? ` | Professor: ${filtrarProfessor}` : ''}`,
+      105,
+      28,
+      { align: 'center' }
+    );
 
-    doc.setFontSize(12);
-    if (filtrarTurma) doc.text(`Turma: ${filtrarTurma}`, 20, 30);
-    if (filtrarProfessor) doc.text(`Professor: ${filtrarProfessor}`, 20, 36);
-
-    ranking.forEach((r, i) => {
-      const y = 50 + i * 8;
-      doc.text(`${i + 1}. ${r.nome}`, 20, y);
-      doc.text(`${r.presenca.toFixed(2)}%`, 140, y, { align: 'right' });
+    autoTable(doc, {
+      startY: 40,
+      head: [['Posição', 'Aluno', '% Presença']],
+      body: ranking.map((r, i) => [i + 1, r.nome, `${r.presenca.toFixed(2)}%`]),
+      styles: { fontSize: 10 },
+      headStyles: {
+        fillColor: [33, 150, 243],
+        textColor: 255,
+        fontStyle: 'bold',
+      },
     });
 
-    doc.save('ranking_presenca.pdf');
+    const hoje = new Date();
+    const dia = String(hoje.getDate()).padStart(2, '0');
+    const mes = String(hoje.getMonth() + 1).padStart(2, '0');
+    const ano = hoje.getFullYear();
+    const dataFormatada = `${dia}-${mes}-${ano}`;
+    const nomeArquivo = `ranking_presenca_${dataFormatada}.pdf`;
+    doc.save(nomeArquivo);
   };
 
   return (

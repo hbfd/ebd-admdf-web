@@ -12,12 +12,9 @@ export default function RelatorioTrimestral() {
   const [ano, setAno] = useState('');
 
   useEffect(() => {
-    const f = JSON.parse(localStorage.getItem('frequencias') || '[]');
-    const t = JSON.parse(localStorage.getItem('turmas') || '[]');
-    const p = JSON.parse(localStorage.getItem('pessoas') || '[]');
-    setFrequencias(f);
-    setTurmas(t);
-    setPessoas(p);
+    setFrequencias(JSON.parse(localStorage.getItem('frequencias') || '[]'));
+    setTurmas(JSON.parse(localStorage.getItem('turmas') || '[]'));
+    setPessoas(JSON.parse(localStorage.getItem('pessoas') || '[]'));
   }, []);
 
   const alunosDaTurma = pessoas.filter(p => p.funcao === 'Aluno' && p.turma === turma);
@@ -30,7 +27,7 @@ export default function RelatorioTrimestral() {
   };
 
   const chamadasTrimestre = frequencias.filter(f => {
-    const data = new Date(f.data);
+    const data = new Date(f.data + 'T00:00:00');
     const mes = data.getMonth() + 1;
     return (
       f.turma === turma &&
@@ -41,11 +38,10 @@ export default function RelatorioTrimestral() {
 
   const totalChamadas = chamadasTrimestre.length;
 
-  const contagem = alunosDaTurma.map((aluno) => {
+  const contagem = alunosDaTurma.map(aluno => {
     const presencas = chamadasTrimestre.filter(f =>
       f.alunos.find(a => a.nome === aluno.nome && a.presente)
     ).length;
-
     return {
       nome: aluno.nome,
       presencas,
@@ -53,19 +49,55 @@ export default function RelatorioTrimestral() {
     };
   });
 
-  const gerarPDF = () => {
-    const doc = new jsPDF();
-    doc.setFontSize(14);
-    doc.text(`Relatório Trimestral - ${trimestre}º Trimestre/${ano}`, 14, 18);
-    doc.text(`Turma: ${turma}`, 14, 26);
+  const carregarLogo = () => {
+    return new Promise((resolve) => {
+      const img = new Image();
+      img.crossOrigin = 'Anonymous';
+      img.src = '/admdf.jpg';
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        canvas.width = img.width;
+        canvas.height = img.height;
+        canvas.getContext('2d').drawImage(img, 0, 0);
+        resolve(canvas.toDataURL('image/jpeg'));
+      };
+    });
+  };
+
+  const gerarPDF = async () => {
+    const doc = new jsPDF({ orientation: 'landscape' });
+    const logo = await carregarLogo();
+
+    doc.addImage(logo, 'JPEG', 10, 10, 25, 25);
+    doc.setFontSize(16);
+    doc.text(`Relatório Trimestral`, 150, 20, { align: 'center' });
+    doc.setFontSize(10);
+    doc.text(`Turma: ${turma || '-'} | ${trimestre}º trimestre/${ano}`, 150, 28, { align: 'center' });
 
     autoTable(doc, {
-      startY: 32,
+      startY: 40,
       head: [['Aluno', 'Presenças', 'Chamadas', '% Presença']],
-      body: contagem.map(a => [a.nome, a.presencas, totalChamadas, `${a.porcentagem}%`]),
+      body: contagem.map(a => [
+        a.nome,
+        a.presencas,
+        totalChamadas,
+        `${a.porcentagem}%`
+      ]),
+      headStyles: {
+        fillColor: [33, 150, 243],
+        textColor: 255,
+        fontStyle: 'bold',
+      },
+      styles: { fontSize: 10 }
     });
 
-    doc.save(`relatorio_trimestral_${turma}_${trimestre}T_${ano}.pdf`);
+    const hoje = new Date();
+    const dia = String(hoje.getDate()).padStart(2, '0');
+    const mes = String(hoje.getMonth() + 1).padStart(2, '0');
+    const anoAtual = hoje.getFullYear();
+    const data = `${dia}-${mes}-${anoAtual}`;
+
+    doc.save(`relatorio_trimestral_${turma}_${data}.pdf`);
   };
 
   return (
@@ -133,12 +165,14 @@ export default function RelatorioTrimestral() {
                     ))}
                   </tbody>
                 </table>
-                <button
-                  onClick={gerarPDF}
-                  className="mt-4 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-                >
-                  Gerar PDF
-                </button>
+                <div className="text-center">
+                  <button
+                    onClick={gerarPDF}
+                    className="mt-4 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+                  >
+                    Gerar PDF
+                  </button>
+                </div>
               </>
             )}
           </div>

@@ -1,4 +1,6 @@
 import { useEffect, useState } from 'react';
+import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
 
 export default function RelatorioMensal() {
   const [frequencias, setFrequencias] = useState([]);
@@ -43,6 +45,47 @@ export default function RelatorioMensal() {
     };
   });
 
+  const carregarLogo = () => {
+    return new Promise((resolve) => {
+      const img = new Image();
+      img.crossOrigin = 'Anonymous';
+      img.src = '/admdf.jpg';
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        canvas.width = img.width;
+        canvas.height = img.height;
+        canvas.getContext('2d').drawImage(img, 0, 0);
+        resolve(canvas.toDataURL('image/jpeg'));
+      };
+    });
+  };
+
+  const gerarPDF = async () => {
+    const doc = new jsPDF({ orientation: 'landscape' });
+    const logo = await carregarLogo();
+
+    doc.addImage(logo, 'JPEG', 10, 10, 25, 25);
+    doc.setFontSize(16);
+    doc.text('Relatório de Presença por Mês', 150, 20, { align: 'center' });
+    doc.setFontSize(10);
+    doc.text(`Turma: ${turma || '-'} | Mês: ${mes.padStart(2, '0')}/${ano}`, 150, 28, { align: 'center' });
+
+    autoTable(doc, {
+      startY: 40,
+      head: [['Aluno', 'Presenças', 'Chamadas', '% Presença']],
+      body: contagem.map(a => [a.nome, a.presencas, totalChamadas, `${a.porcentagem}%`]),
+      styles: { fontSize: 10 },
+      headStyles: {
+        fillColor: [33, 150, 243],
+        textColor: 255,
+        fontStyle: 'bold',
+      },
+    });
+
+    const nomeArquivo = `mensal_${turma}_${mes.padStart(2, '0')}-${ano}.pdf`;
+    doc.save(nomeArquivo);
+  };
+
   return (
     <div className="min-h-screen p-6 bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-white">
       <h1 className="text-2xl font-bold mb-6 text-center">Relatório de Presença por Mês</h1>
@@ -86,26 +129,34 @@ export default function RelatorioMensal() {
             {contagem.length === 0 ? (
               <p className="text-gray-500 dark:text-gray-300">Nenhum aluno encontrado para essa turma.</p>
             ) : (
-              <table className="w-full border text-sm">
-                <thead>
-                  <tr className="bg-blue-100 dark:bg-blue-800 text-black dark:text-white">
-                    <th className="p-2 border dark:border-gray-600">Aluno</th>
-                    <th className="p-2 border dark:border-gray-600">Presenças</th>
-                    <th className="p-2 border dark:border-gray-600">Chamadas</th>
-                    <th className="p-2 border dark:border-gray-600">% Presença</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {contagem.map((a, i) => (
-                    <tr key={i} className="text-center">
-                      <td className="p-2 border dark:border-gray-600">{a.nome}</td>
-                      <td className="p-2 border dark:border-gray-600">{a.presencas}</td>
-                      <td className="p-2 border dark:border-gray-600">{totalChamadas}</td>
-                      <td className="p-2 border dark:border-gray-600">{a.porcentagem}%</td>
+              <>
+                <table className="w-full border text-sm">
+                  <thead>
+                    <tr className="bg-blue-100 dark:bg-blue-800 text-black dark:text-white">
+                      <th className="p-2 border dark:border-gray-600">Aluno</th>
+                      <th className="p-2 border dark:border-gray-600">Presenças</th>
+                      <th className="p-2 border dark:border-gray-600">Chamadas</th>
+                      <th className="p-2 border dark:border-gray-600">% Presença</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody>
+                    {contagem.map((a, i) => (
+                      <tr key={i} className="text-center">
+                        <td className="p-2 border dark:border-gray-600">{a.nome}</td>
+                        <td className="p-2 border dark:border-gray-600">{a.presencas}</td>
+                        <td className="p-2 border dark:border-gray-600">{totalChamadas}</td>
+                        <td className="p-2 border dark:border-gray-600">{a.porcentagem}%</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+                <button
+                  onClick={gerarPDF}
+                  className="mt-4 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+                >
+                  Gerar PDF
+                </button>
+              </>
             )}
           </div>
         )}

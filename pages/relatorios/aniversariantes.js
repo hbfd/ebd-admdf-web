@@ -21,7 +21,22 @@ export default function Aniversariantes() {
     setListaAniversariantes(filtrados);
   }, [mes, alunos]);
 
-  const exportarPDF = () => {
+  const carregarLogo = () => {
+    return new Promise((resolve) => {
+      const img = new Image();
+      img.crossOrigin = 'Anonymous';
+      img.src = '/admdf.jpg';
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        canvas.width = img.width;
+        canvas.height = img.height;
+        canvas.getContext('2d').drawImage(img, 0, 0);
+        resolve(canvas.toDataURL('image/jpeg'));
+      };
+    });
+  };
+
+  const exportarPDF = async () => {
     if (listaAniversariantes.length === 0) {
       Swal.fire({
         icon: 'info',
@@ -32,17 +47,29 @@ export default function Aniversariantes() {
     }
 
     const doc = new jsPDF();
-    doc.setFontSize(16);
-    doc.text('Aniversariantes do Mês', 20, 20);
-    doc.setFontSize(12);
-    doc.text(`Mês: ${mes}`, 20, 28);
+    const logo = await carregarLogo();
 
+    doc.addImage(logo, 'JPEG', 10, 10, 25, 25);
+    doc.setFontSize(16);
+    doc.text('Relatório de Aniversariantes', 105, 20, { align: 'center' });
+
+    doc.setFontSize(10);
+    const [ano, mm] = mes.split('-');
+    doc.text(`Mês: ${mm}/${ano}`, 105, 28, { align: 'center' });
+
+    doc.setFontSize(12);
     listaAniversariantes.forEach((a, i) => {
       const dt = new Date(a.dataNascimento).toLocaleDateString();
-      doc.text(`${i + 1}. ${a.nome} — ${dt}`, 20, 36 + i * 8);
+      doc.text(`${i + 1}. ${a.nome} — ${dt}`, 20, 40 + i * 8);
     });
 
-    doc.save(`aniversariantes_${mes}.pdf`);
+    const dataHoje = new Date();
+    const dia = String(dataHoje.getDate()).padStart(2, '0');
+    const mesAtual = String(dataHoje.getMonth() + 1).padStart(2, '0');
+    const anoAtual = dataHoje.getFullYear();
+    const nomeArquivo = `aniversariantes_${dia}-${mesAtual}-${anoAtual}.pdf`;
+
+    doc.save(nomeArquivo);
   };
 
   return (
